@@ -1,0 +1,84 @@
+---
+title: "Exercise3"
+format: html
+editor: visual
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(sf)
+
+wildschwein <- read_csv("data/wildschwein_BE_2056.csv")
+read_csv("data/posmo.csv")
+
+
+```
+
+```{r}
+sabi <- wildschwein %>% 
+  unique() %>%
+  filter(TierName=="Sabi") %>%
+  filter(DatetimeUTC >= "2015-07-01", DatetimeUTC < "2015-07-03") 
+```
+
+```{r}
+ggplot(sabi, aes(E,N, color=DatetimeUTC)) +
+  geom_point() +
+  geom_path() +
+  coord_equal() +
+  theme_minimal()
+  
+```
+
+```{r}
+ggplot(sabi, aes(DatetimeUTC, 1)) +
+  geom_point()
+```
+
+```{r}
+
+sabi <- sabi %>%
+    mutate(
+        nMinus2 = sqrt((lag(E, 2) - E)^2 + (lag(N, 2) - N)^2), 
+        nMinus1 = sqrt((lag(E, 1) - E)^2 + (lag(N, 1) - N)^2), 
+        nPlus1  = sqrt((E - lead(E, 1))^2 + (N - lead(N, 1))^2), 
+        nPlus2  = sqrt((E - lead(E, 2))^2 + (N - lead(N, 2))^2)
+    )
+
+sabi <- sabi %>%
+  rowwise() %>%
+  mutate(
+    stepMean = mean(c(nMinus2, nMinus1, nPlus1, nPlus2))) %>%
+  ungroup() %>%
+  mutate(
+    static= stepMean < mean(stepMean, na.rm =T))
+
+sabi_static <- sabi %>%
+  filter(!static)
+```
+
+```{r}
+grid.arrange(
+  
+sabi %>%
+  ggplot(aes(E,N, color=static)) +
+  geom_path() +
+  geom_point() +
+  coord_fixed()
+,
+sabi_static %>%
+  ggplot(aes(E,N)) +
+  geom_path() +
+  geom_point() +
+  coord_fixed()
+, nrow=1
+)
+
+```
+
+```{r}
+
+```
