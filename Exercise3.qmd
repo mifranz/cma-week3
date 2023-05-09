@@ -4,6 +4,8 @@ format: html
 editor: visual
 ---
 
+***Libraries***
+
 ```{r}
 library(readr)
 library(dplyr)
@@ -11,11 +13,20 @@ library(ggplot2)
 library(gridExtra)
 library(sf)
 
-wildschwein <- read_csv("data/wildschwein_BE_2056.csv")
-read_csv("data/posmo.csv")
+
 
 
 ```
+
+## Data
+
+```{r}
+wildschwein <- read_csv("data/wildschwein_BE_2056.csv")
+posmo <- read_delim("data/posmo_20230605-20230905.csv")
+
+```
+
+## Intro
 
 ```{r}
 sabi <- wildschwein %>% 
@@ -61,28 +72,36 @@ sabi_static <- sabi %>%
 ```
 
 ```{r}
-
-```
-
-```{r}
 grid.arrange(
   
 sabi %>%
   ggplot(aes(E,N, color=static)) +
   geom_path() +
   geom_point() +
-  coord_fixed()
+  coord_fixed() +
+  ggtitle("Static & not static points compared") +
+  labs(color = "Static") 
 ,
 sabi_static %>%
-  ggplot(aes(E,N)) +
+  ggplot(aes(E,N, color=TierName)) +
   geom_path() +
   geom_point() +
-  coord_fixed()
+  coord_fixed() +
+  ggtitle("Path with static Points removed") +
+  labs(color="Path of Sabi")
 , nrow=1
 )
 
 ```
 
-```{r}
+## Preparation
 
+```{r}
+# Keep only the necessary columns
+posmo <- select(posmo, datetime, lon_x, lat_y)
+posmo <- st_as_sf(posmo, coords = c("lon_x","lat_y"), crs = 4326) %>%
+  st_transform(2056)
+
+posmo_coords <- st_coordinates(posmo)
+posmo <- cbind(posmo,posmo_coords)
 ```
