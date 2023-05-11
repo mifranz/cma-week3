@@ -12,10 +12,10 @@ library(dplyr)
 library(ggplot2)
 library(gridExtra)
 library(sf)
-
-
-
-
+library(lubridate)
+library(mapview)
+library(leaflet)
+library(leaflet.extras)
 ```
 
 ## Data
@@ -98,10 +98,62 @@ sabi_static %>%
 
 ```{r}
 # Keep only the necessary columns
+posmo <- read_delim("data/posmo_20230605-20230905.csv")
 posmo <- select(posmo, datetime, lon_x, lat_y)
 posmo <- st_as_sf(posmo, coords = c("lon_x","lat_y"), crs = 4326) %>%
   st_transform(2056)
 
 posmo_coords <- st_coordinates(posmo)
 posmo <- cbind(posmo,posmo_coords)
+```
+
+## Task 1
+
+Visually comparing different stepMeans to get a reasonable threshold determine stops.
+
+```{r}
+posmo <- posmo %>%
+    mutate(
+        nMinus2 = sqrt((lag(X, 2) - X)^2 + (lag(Y, 2) - Y)^2), 
+        nMinus1 = sqrt((lag(X, 1) - X)^2 + (lag(Y, 1) - Y)^2), 
+        nPlus1  = sqrt((X - lead(X, 1))^2 + (Y - lead(Y, 1))^2), 
+        nPlus2  = sqrt((X - lead(X, 2))^2 + (Y - lead(Y, 2))^2)) %>%
+  rowwise() %>%
+  mutate(
+    stepMean = mean(c(nMinus2, nMinus1, nPlus1, nPlus2))) %>%
+  ungroup() %>%
+  mutate(
+    static10= stepMean < 10) %>%
+    mutate(
+    static15= stepMean < 15) %>%
+  mutate(
+    static20= stepMean < 20) %>%
+  mutate(
+    static25= stepMean < 25) %>%
+  mutate(
+    static30= stepMean < 30) %>%
+  mutate(
+    static35= stepMean < 35) %>%
+  mutate (
+    rownr=row_number())
+
+overallMean <- mean(posmo$stepMean, na.rm =T)
+
+posmo_0507 <- posmo %>% filter(datetime < "2023-05-07")
+posmo_0508 <- posmo %>% filter(datetime > "2023-05-07" & datetime<"2023-05-09")
+
+mapview(posmo_0508, zcol="static10")+
+  mapview(posmo_0508, zcol="static15") +
+  mapview(posmo_0508, zcol="static20") +
+  mapview(posmo_0508, zcol="static25") +
+  mapview(posmo_0508, zcol="static30") +
+  mapview(posmo_0508, zcol="static35") +
+  mapview(posmo_0508 %>% filter(static15==F), zcol="rownr", popup="datetime")
+
+```
+
+## Task 3
+
+```{r}
+
 ```
