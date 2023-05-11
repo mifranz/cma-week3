@@ -278,22 +278,12 @@ for (i in 1:5){
   #lcs_list[[i]] <- lcs
 }
 
-#print(dtw_list)
-#print(edi_list)
-print(frech_list)
-#print(lcs_list)
+cmpare <-data.frame(cbind(dtw = dtw_list, edi = edi_list, frech = frech_list, lcs = lcs_list))
 
 ```
 
 ```{r}
 
-cmpare <-data.frame(cbind(dtw = dtw_list, edi = edi_list, frech = frech_list, lcs = lcs_list))
-
-library(gridExtra)
-library(ggplot2)
-
-library(gridExtra)
-library(ggplot2)
 
 # Define a color palette for the bars
 color_palette <- c("lightyellow", "lightgreen", "lightblue", "pink", "gray")
