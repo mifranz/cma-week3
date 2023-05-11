@@ -139,7 +139,6 @@ posmo <- posmo %>%
 
 overallMean <- mean(posmo$stepMean, na.rm =T)
 
-posmo_0507 <- posmo %>% filter(datetime < "2023-05-07")
 posmo_0508 <- posmo %>% filter(datetime > "2023-05-07" & datetime<"2023-05-09")
 
 mapview(posmo_0508, zcol="static10")+
@@ -155,10 +154,21 @@ mapview(posmo_0508, zcol="static10")+
 ## Task 3
 
 ```{r}
-
 ggplot(posmo_0508, aes(X,Y, color=static15)) +
   geom_point() +
   ggtitle(paste0("Tracking Data Micha from ", as_date(posmo_0508$datetime[1]))) +
   labs(color="Static") +
   theme_minimal()
+```
+
+## Task 4
+
+```{r}
+rle_id <- function(vec) {
+    x <- rle(vec)$lengths
+    as.factor(rep(seq_along(x), times = x))
+}
+
+posmo_0508 <- posmo_0508 %>%
+    mutate(segment_id = rle_id(static15))
 ```
