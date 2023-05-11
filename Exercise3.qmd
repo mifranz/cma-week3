@@ -156,4 +156,9 @@ mapview(posmo_0508, zcol="static10")+
 
 ```{r}
 
+ggplot(posmo_0508, aes(X,Y, color=static15)) +
+  geom_point() +
+  ggtitle(paste0("Tracking Data Micha from ", as_date(posmo_0508$datetime[1]))) +
+  labs(color="Static") +
+  theme_minimal()
 ```
