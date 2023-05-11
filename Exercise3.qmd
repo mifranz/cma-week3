@@ -16,6 +16,7 @@ library(lubridate)
 library(mapview)
 library(leaflet)
 library(leaflet.extras)
+library(SimilarityMeasures)
 ```
 
 ## Data
@@ -23,7 +24,6 @@ library(leaflet.extras)
 ```{r}
 wildschwein <- read_csv("data/wildschwein_BE_2056.csv")
 posmo <- read_delim("data/posmo_20230605-20230905.csv")
-
 ```
 
 ## Intro
@@ -41,7 +41,6 @@ ggplot(sabi, aes(E,N, color=DatetimeUTC)) +
   geom_path() +
   coord_equal() +
   theme_minimal()
-  
 ```
 
 ```{r}
@@ -218,4 +217,104 @@ p <- ggplot(pedestrian, aes(E, N)) +
 plots[[length(plots)+1]] <- p 
 
 grid.arrange(grobs = plots, ncol = 2)
+```
+
+## Task 6
+
+```{r}
+traj1 <- pedestrian %>% 
+  filter(TrajID == 1) %>%
+  select(N,E) %>%
+  as.matrix()
+
+traj2 <- pedestrian %>% 
+  filter(TrajID == 2) %>%
+  select(N,E) %>%
+  as.matrix()
+
+traj3 <- pedestrian %>% 
+  filter(TrajID == 3) %>%
+  select(N,E) %>%
+  as.matrix()
+
+traj3 <- pedestrian %>% 
+  filter(TrajID == 3) %>%
+  select(N,E) %>%
+  as.matrix()
+
+traj4 <- pedestrian %>% 
+  filter(TrajID == 4) %>%
+  select(N,E) %>%
+  as.matrix()
+
+traj5 <- pedestrian %>% 
+  filter(TrajID == 5) %>%
+  select(N,E) %>%
+  as.matrix()
+
+traj6 <- pedestrian %>% 
+  filter(TrajID == 6) %>%
+  select(N,E) %>%
+  as.matrix()
+
+
+traj_list <- list(traj2,traj3,traj4,traj5,traj6)
+
+dtw_list <- list()
+edi_list <- list()
+frech_list <- list()
+lcs_list <- list()
+
+
+for (i in 1:5){
+  #dtw <- DTW(traj1, traj_list[[i]])
+  #edi <- EditDist(traj1, traj_list[[i]])
+  frech <- Frechet(traj1, traj_list[[i]])
+  #lcs <- LCSS(traj1, traj2, pointSpacing = 5, pointDistance = 20, errorMarg = 5, returnTrans = FALSE)
+  
+  #dtw_list[[i]] <- dtw
+  #edi_list[[i]] <- edi
+  frech_list[[i]] <- frech
+  #lcs_list[[i]] <- lcs
+}
+
+#print(dtw_list)
+#print(edi_list)
+print(frech_list)
+#print(lcs_list)
+
+```
+
+```{r}
+
+cmpare <-data.frame(cbind(dtw = dtw_list, edi = edi_list, frech = frech_list, lcs = lcs_list))
+
+library(gridExtra)
+library(ggplot2)
+
+library(gridExtra)
+library(ggplot2)
+
+# Define a color palette for the bars
+color_palette <- c("lightyellow", "lightgreen", "lightblue", "pink", "gray")
+
+grid.arrange(
+  ggplot(cmpare, aes(x = seq_along(dtw), y = as.numeric(dtw), fill = factor(seq_along(dtw)))) +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values = color_palette, guide = FALSE),
+
+  ggplot(cmpare, aes(x = seq_along(edi), y = as.numeric(edi), fill = factor(seq_along(edi)))) +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values = color_palette, guide = FALSE),
+
+  ggplot(cmpare, aes(x = seq_along(frech), y = as.numeric(frech), fill = factor(seq_along(frech)))) +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values = color_palette, guide = FALSE),
+
+  ggplot(cmpare, aes(x = seq_along(lcs), y = as.numeric(lcs), fill = factor(seq_along(lcs)))) +
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values = color_palette, guide = FALSE),
+
+  nrow = 2
+)
 ```
