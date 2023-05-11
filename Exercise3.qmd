@@ -196,3 +196,26 @@ grid.arrange(
 ```
 
 ## Task 5
+
+```{r}
+pedestrian <- read_csv("data/pedestrian.csv")
+
+plots <- list()  # Create an empty list to store the plots
+cols <- list("purple", "lightgreen", "pink", "lightblue", "grey", "orange")
+for (id in 1:6) {
+  p <- ggplot(pedestrian %>% filter(TrajID == id), aes(E, N)) +
+    geom_path()+
+    geom_point(color = cols[id]) +
+    ggtitle(paste0("TrajID: ", as.character(id)))
+  
+  plots[[id]] <- p  # Add each plot to the list
+  
+}
+
+p <- ggplot(pedestrian, aes(E, N)) +
+      geom_point()
+
+plots[[length(plots)+1]] <- p 
+
+grid.arrange(grobs = plots, ncol = 2)
+```
