@@ -170,5 +170,29 @@ rle_id <- function(vec) {
 }
 
 posmo_0508 <- posmo_0508 %>%
-    mutate(segment_id = rle_id(static15))
+  mutate(segment_id = rle_id(static15)) %>%
+  group_by(segment_id) %>%
+  mutate(segment_len = n()) %>%
+  ungroup
+  
 ```
+
+```{r}
+posmo_0508_cleaned <- posmo_0508 %>%
+  filter(segment_len >= 5)
+
+grid.arrange(
+  ggplot(posmo_0508, aes(X,Y, color=segment_id))+
+    geom_point(show.legend = FALSE) +
+    geom_point(posmo_0508 %>% filter(segment_len<5), mapping=aes(X,Y), color="black") +
+    theme_minimal() +
+    ggtitle("All Segments"),
+  
+  ggplot(posmo_0508_cleaned, aes(X,Y, color=segment_id))+
+    geom_point(show.legend = FALSE) +
+    theme_minimal()+
+    ggtitle("Long Segments Only")
+)
+```
+
+## Task 5
